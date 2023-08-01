@@ -1,10 +1,11 @@
 using SparseArrays
-
+#Aggiornata
 function From_3D_to_1D(i, j, k, M, N) 
 	pos = ((k-1) * M * N) + ((j-1) * M) + i;
     return convert(Int64,pos)
 end
 
+#Aggiornata
 function bin_search(num, A)
     index = 0
     n = length(A)
@@ -249,6 +250,7 @@ function create_nodes_ref(matrice, Nx,Ny,Nz, num_centri, external_g, m_volumes)
     return nodes_red,nodes
 end
 
+#Aggiornata
 function distfcm(center, data)
     out = zeros(size(center, 1), size(data, 1))
     if size(center[1][1], 2) > 1
@@ -263,6 +265,7 @@ function distfcm(center, data)
     return out
 end
 
+#Aggiornata
 function nodes_find_rev(Nodes_inp_coord, nodi_centri, node_to_skip)
     indici = sortperm(vec(distfcm(Nodes_inp_coord, nodi_centri)))
     if indici[1] != node_to_skip
@@ -273,6 +276,7 @@ function nodes_find_rev(Nodes_inp_coord, nodi_centri, node_to_skip)
     return nodes
 end
 
+#Aggiornata
 function find_nodes_port(nodi_centri, port_start, port_end, nodi, nodi_red)
     N = size(port_start)[1]
     port_voxels = zeros(Int64, N, 2)
@@ -436,6 +440,7 @@ function create_mapping_Ax(matrice,Nx,Ny,Nz)
     return mapping,num_ele
 end
 
+#Non sostituita
 function create_mapping_Ay(matrice,Nx,Ny,Nz)
     num_grids = size(matrice)[1]
 
@@ -464,6 +469,7 @@ function create_mapping_Ay(matrice,Nx,Ny,Nz)
     return mapping,num_ele
 end
 
+#Non sostituita
 function create_mapping_Az(matrice,Nx,Ny,Nz)
     num_grids = size(matrice)[1]
     N_max = ( Nx * Ny * (Nz - 1) )
