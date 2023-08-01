@@ -27,7 +27,7 @@ function bin_search(num, A)
     return index
 end
 
-#Non sostituita
+#Non sostituita perché identica alle corrispondenti
 function create_volumes_mapping_and_centers(matrice,Nx,Ny,Nz,num_centri,sx,sy,sz,min_v)
 
 
@@ -497,6 +497,7 @@ function create_mapping_Az(matrice,Nx,Ny,Nz)
     return mapping,num_ele
 end
 
+#Non sostituita
 function create_A_mats_volInd(matrice,Nx,Ny,Nz,mapping_Vox,mapAx, NAx, mapAy, NAy, mapAz, NAz, sx,sy,sz,min_v,nodi,nodi_red)
  
     num_grids = size(matrice)[1]
@@ -701,18 +702,12 @@ function create_A_mats_volInd(matrice,Nx,Ny,Nz,mapping_Vox,mapAx, NAx, mapAy, NA
     return ind_row,ind_col,vals_A,lix_mat,liy_mat,liz_mat,lix_border,liy_border,liz_border,bars_Lp_x,bars_Lp_y,bars_Lp_z
 end
 
+#Non sostituita
 function ver_con(A,B)
     return vcat(A,B)
 end
 
-function vect_con(A,B)
-    if ((typeof(A) == Vector{Int} && typeof(B) == Vector{Int}) || (typeof(A) == Vector{Float64} && typeof(B) == Vector{Float64}))
-        return [A;B]
-    else
-        return hcat(A,B)
-    end
-end
-
+#Non sostituita
 function compute_diagonals(MATER,sx,sy,sz,lix_mat,liy_mat,liz_mat,lix_border,liy_border,liz_border)
     eps0 = 8.854187816997944e-12
     num_grids = length(MATER)
@@ -842,6 +837,7 @@ function compute_diagonals(MATER,sx,sy,sz,lix_mat,liy_mat,liz_mat,lix_border,liy
     return diag_R, diag_Cd
 end
 
+#Non sostituita
 function create_Gamma_and_center_sup(matrice, Nx,Ny,Nz, map_volumes, min_v, sx, sy, sz, nodi, nodi_red, ext_grids)
     num_grids = size(matrice)[1]
     mapping_surf_1 = zeros(Int64, Nx * Ny * Nz)
@@ -1176,6 +1172,7 @@ function create_Gamma_and_center_sup(matrice, Nx,Ny,Nz, map_volumes, min_v, sx, 
 
     return vals,ind_r,ind_c,sup_centers,sup_type
 end
+
 
 function generate_interconnection_matrices_and_centers(size_x,size_y,size_z,grid_matrix,num_cel_x,num_cel_y,num_cel_z,materials,port_matrix,lumped_el_matrix,minimum_vertex)
 
