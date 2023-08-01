@@ -1,21 +1,17 @@
 using SparseArrays
 
-function From_3D_to_1D(i, j, k, M, N)
-    pos = ((k-1) * M * N) + ((j-1) * M) + i;
-    return pos
+function From_3D_to_1D(i, j, k, M, N) 
+	pos = ((k-1) * M * N) + ((j-1) * M) + i;
+    return convert(Int64,pos)
 end
 
 function bin_search(num, A)
-
-    index = 1
-    n = size(A)[1]
+    index = 0
+    n = length(A)
     left = 1
     right = n
-
     while left <= right
-        mid = ceil(Int, (left + right) / 2)
-        #mid = Int64((left + right) / 2)
-
+        mid = ceil((left + right) / 2)
         if A[mid] == num
             index = mid
             break
@@ -30,6 +26,7 @@ function bin_search(num, A)
     return index
 end
 
+#Non sostituita
 function create_volumes_mapping_and_centers(matrice,Nx,Ny,Nz,num_centri,sx,sy,sz,min_v)
 
 
@@ -63,6 +60,7 @@ function create_volumes_mapping_and_centers(matrice,Nx,Ny,Nz,num_centri,sx,sy,sz
     return num_ele,mapping,centri_vox,id_mat
 end
 
+#Non sostituita
 function create_nodes_ref(matrice, Nx,Ny,Nz, num_centri, external_g, m_volumes)
 
     num_grids = size(matrice)[1]
@@ -251,59 +249,44 @@ function create_nodes_ref(matrice, Nx,Ny,Nz, num_centri, external_g, m_volumes)
     return nodes_red,nodes
 end
 
-function slicematrix(A::AbstractMatrix{T}) where T
-    m, n = size(A)
-    B = Vector{T}[Vector{T}(undef, n) for _ in 1:m]
-    for i in 1:m
-        B[i] .= A[i, :]
-    end
-    return B
-end
-
 function distfcm(center, data)
-    function sum_el(array)
-        sum = 0
-        for el in array
-            sum = sum + el
+    out = zeros(size(center, 1), size(data, 1))
+    if size(center[1][1], 2) > 1
+        for k in range(1,size(center[1][1], 1))
+            out[k, :] = sqrt.(sum((data .- ones(size(data, 1), 1) .* center[k][k]).^2, dims=2))
         end
-        return sum
+    else
+        for k in range(1,size(center, 1))
+            out[k, :] = transpose(abs.(center[k] .- data))
+        end
     end
-
-    out = slicematrix(sum(sum_el, (data .- (ones(size(data)[1],1) .* center)[1][1]).^2, dims=2).^0.5)
     return out
 end
 
 function nodes_find_rev(Nodes_inp_coord, nodi_centri, node_to_skip)
-
-    indici = sortperm(distfcm(Nodes_inp_coord, nodi_centri))
-
-    if (indici[1]!=node_to_skip)
-        node = indici[1]
+    indici = sortperm(vec(distfcm(Nodes_inp_coord, nodi_centri)))
+    if indici[1] != node_to_skip
+        nodes = indici[1]
     else
-        node = indici[2]
+        nodes = indici[2]
     end
-
-    return node
+    return nodes
 end
 
 function find_nodes_port(nodi_centri, port_start, port_end, nodi, nodi_red)
-
     N = size(port_start)[1]
     port_voxels = zeros(Int64, N, 2)
     port_nodes = zeros(Int64, N, 2)
-
     for cont in range(1, stop=N)
         port_voxels[cont, 1] = nodes_find_rev(port_start[cont,:], nodi_centri, -1)
         port_voxels[cont, 2] = nodes_find_rev(port_end[cont,:],nodi_centri, port_voxels[cont,1])
-        port_nodes[cont, 1] = bin_search(nodi[port_voxels[cont, 1]],nodi_red)
-        port_nodes[cont, 2] = bin_search(nodi[port_voxels[cont, 2]],nodi_red)
+        port_nodes[cont, 1] = bin_search(nodi[convert(Int64,port_voxels[cont, 1])], nodi_red)
+        port_nodes[cont, 2] = bin_search(nodi[convert(Int64,port_voxels[cont, 2])], nodi_red)
     end
-
-
-
     return port_voxels, port_nodes
 end
 
+#Non sostituita
 function create_external_grids(matrice,Nx,Ny,Nz)
     num_grids = size(matrice)[1]
     
@@ -424,6 +407,7 @@ function create_external_grids(matrice,Nx,Ny,Nz)
     return OUTPUTgrids
 end
 
+#Non sostituita
 function create_mapping_Ax(matrice,Nx,Ny,Nz)
     num_grids = size(matrice)[1]
 
