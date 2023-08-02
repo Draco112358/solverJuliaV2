@@ -61,193 +61,421 @@ function create_volumes_mapping_and_centers(matrice,Nx,Ny,Nz,num_centri,sx,sy,sz
     return num_ele,mapping,centri_vox,id_mat
 end
 
-#Non sostituita
-function create_nodes_ref(matrice, Nx,Ny,Nz, num_centri, external_g, m_volumes)
-
-    num_grids = size(matrice)[1]
-    nodes = zeros(Int64, num_centri)
-
-    for cont in range(1, stop=Nx)
-        for cont2 in range(1, stop=Ny)
-            for cont3 in range(1, stop=Nz)
-                for k in range(1, stop=num_grids)
-                    if (matrice[k][cont][cont2][cont3] == 1)
+#Aggiornata
+function create_nodes_ref(grids, Nx, Ny, Nz, num_full_vox, external_grids, mapping_vols, dominant_list)
+    num_grids = size(external_grids, 1)
+    nodes = zeros(num_full_vox)
+    lista_nod = zeros(num_full_vox)
+    cont_d = 0
+    for ka in range(1,length(dominant_list))
+        k = dominant_list[ka]
+        for cont = 1:Nx
+            for cont2 = 1:Ny
+                for cont3 = 1:Nz
+                    if grids[k][cont][cont2][cont3]
                         c1 = 1 + 2 * (cont - 1) + 1
                         c2 = 1 + 2 * (cont2 - 1) + 1
                         c3 = 1 + 2 * (cont3 - 1) + 1
-                        f1 = external_g[k, 1, cont, cont2, cont3]
-                        f2 = external_g[k, 2, cont, cont2, cont3]
-                        f3 = external_g[k, 3, cont, cont2, cont3]
-                        f4 = external_g[k, 4, cont, cont2, cont3]
-                        f5 = external_g[k, 5, cont, cont2, cont3]
-                        f6 = external_g[k, 6, cont, cont2, cont3]
-                        is_f1 = f1
-                        is_f2 = f2
-                        if (f1==1 && f2==1)
-                            is_f1 = 0
-                            is_f2 = 0
-                        end
-
-                        is_f3 = f3
-                        is_f4 = f4
-                        if (f3==1 && f4==1)
-                            is_f3 = 0
-                            is_f4 = 0
-                        end
-
-                        is_f5 = f5
-                        is_f6 = f6
-                        if (f5 == 1 && f6 == 1)
-                            is_f5 = 0
-                            is_f6 = 0
-                        end
-
-                        if (is_f1==1 || is_f2==1 || is_f3==1 || is_f4==1 || is_f5==1 || is_f6==1) 
-                            if (is_f1==1 && is_f2==0 && is_f3==0 && is_f4==0 && is_f5==0 && is_f6==0) 
-                                nodes[m_volumes[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)]] = 
-                                    From_3D_to_1D(c1, c2 - 1, c3, 3 * Nx, 3 * Ny)
-                            else
-                                if (is_f2 == 1 && is_f1 == 0 && is_f3 == 0 && is_f4 == 0 && is_f5 == 0 && is_f6 == 0)
-                                    nodes[m_volumes[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)]] = 
-                                        From_3D_to_1D(c1, c2 + 1, c3, 3 * Nx, 3 * Ny)
-                                else
-                                    if (is_f3 == 1 && is_f1 == 0 && is_f2 == 0 && is_f4 == 0 && is_f5 == 0 && is_f6 == 0)
-                                        nodes[m_volumes[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)]] = 
-                                            From_3D_to_1D(c1-1, c2 , c3, 3 * Nx, 3 * Ny)
-                                    else
-                                        if (is_f4 == 1 && is_f1 == 0 && is_f2 == 0 && is_f3 == 0 && is_f5 == 0 && is_f6 == 0)
-                                            nodes[m_volumes[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)]] = 
-                                                From_3D_to_1D(c1 + 1, c2, c3, 3 * Nx, 3 * Ny)
-                                        else
-                                            if (is_f5 == 1 && is_f1 == 0 && is_f2 == 0 && is_f3 == 0 && is_f4 == 0 && is_f6 == 0)
-                                                nodes[m_volumes[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)]] = 
-                                                    From_3D_to_1D(c1, c2, c3-1, 3 * Nx, 3 * Ny)
-                                            else
-                                                if (is_f6 == 1 && is_f1 == 0 && is_f2 == 0 && is_f3 == 0 && is_f4 == 0 && is_f5 == 0)
-                                                    nodes[m_volumes[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)]] = 
-                                                        From_3D_to_1D(c1, c2, c3 + 1, 3 * Nx, 3 * Ny)
-                                                else
-                                                    if (is_f1 == 1 && is_f3 == 1 && is_f2 == 0 && is_f4 == 0 && is_f5 == 0 && is_f6 == 0)
-                                                        nodes[m_volumes[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)]] = 
-                                                            From_3D_to_1D(c1-1, c2-1, c3, 3 * Nx, 3 * Ny)
-                                                    else
-                                                        if (is_f1 == 1 && is_f4 == 1 && is_f2 == 0 && is_f3 == 0 && is_f5 == 0 && is_f6 == 0)
-                                                            nodes[m_volumes[
-                                                                From_3D_to_1D(cont, cont2, cont3, Nx, Ny)]] = 
-                                                                From_3D_to_1D(c1 + 1, c2 - 1, c3, 3 * Nx, 3 * Ny)
-                                                        else
-                                                            if (is_f1 == 1 && is_f5 == 1 && is_f2 == 0 && is_f3 == 0 && is_f4 == 0 && is_f6 == 0)
-                                                                nodes[m_volumes[
-                                                                    From_3D_to_1D(cont, cont2, cont3, Nx, Ny)]] = 
-                                                                    From_3D_to_1D(c1, c2 - 1, c3 - 1, 3 * Nx, 3 * Ny)
-                                                            else
-                                                                if (is_f1 == 1 && is_f6 == 1 && is_f2 == 0 && is_f3 == 0 && is_f4 == 0 && is_f5 == 0)
-                                                                    nodes[m_volumes[
-                                                                        From_3D_to_1D(cont, cont2, cont3, Nx, Ny)]] = 
-                                                                        From_3D_to_1D(c1, c2 - 1, c3 + 1, 3 * Nx,3 * Ny)
-                                                                else
-                                                                    if (is_f1 == 1 && is_f3 == 1 && is_f5 == 1 && is_f2 == 0 && is_f4 == 0 && is_f6 == 0)
-                                                                        nodes[m_volumes[From_3D_to_1D(cont, cont2, cont3, Nx,Ny)]] = 
-                                                                            From_3D_to_1D(c1-1, c2 - 1, c3 - 1, 3 * Nx, 3 * Ny)
-                                                                    else
-                                                                        if (is_f1 == 1 && is_f3 == 1 && is_f6 == 1 && is_f2 == 0 && is_f4 == 0 && is_f5 == 0)
-                                                                            nodes[m_volumes[From_3D_to_1D(cont, cont2, cont3, Nx,Ny)]] = 
-                                                                                From_3D_to_1D(c1 - 1, c2 - 1, c3 + 1,3 * Nx, 3 * Ny)
-                                                                        else
-                                                                            if (is_f1 == 1 && is_f4 == 1 && is_f5 == 1 && is_f2 == 0 && is_f3 == 0 && is_f6 == 0)
-                                                                                nodes[m_volumes[From_3D_to_1D(cont, cont2, cont3,Nx, Ny)]] = 
-                                                                                    From_3D_to_1D(c1 + 1, c2 - 1,c3 - 1, 3 * Nx,3 * Ny)
-                                                                            else
-                                                                                if (is_f1 == 1 && is_f4 == 1 && is_f6 == 1 && is_f2 == 0 && is_f3 == 0 && is_f5 == 0)
-                                                                                    nodes[m_volumes[From_3D_to_1D(cont, cont2,cont3, Nx, Ny)]] = 
-                                                                                        From_3D_to_1D(c1 + 1, c2 - 1,c3 + 1, 3 * Nx,3 * Ny)
-                                                                                else
-                                                                                    if (is_f2 == 1 && is_f3 == 1 && is_f1 == 0 && is_f4 == 0 && is_f5 == 0 && is_f6 == 0)
-                                                                                        nodes[m_volumes[From_3D_to_1D(cont, cont2,cont3, Nx,Ny)]] = 
-                                                                                            From_3D_to_1D(c1 - 1,c2 + 1,c3,3 * Nx,3 * Ny)
-                                                                                    else
-                                                                                        if (is_f2 == 1 && is_f4 == 1 && is_f1 == 0 && is_f3 == 0 && is_f5 == 0 && is_f6 == 0)
-                                                                                            nodes[m_volumes[From_3D_to_1D(cont,cont2,cont3, Nx,Ny)]] = 
-                                                                                                From_3D_to_1D(c1 + 1,c2 + 1,c3,3 * Nx,3 * Ny)
-                                                                                        else
-                                                                                            if (is_f2 == 1 && is_f5 == 1 && is_f1 == 0 && is_f3 == 0 && is_f4 == 0 && is_f6 == 0)
-                                                                                                nodes[m_volumes[From_3D_to_1D(cont,cont2,cont3,Nx,Ny)]] = 
-                                                                                                    From_3D_to_1D(c1, c2 + 1,c3 - 1, 3 * Nx,3 * Ny)
-                                                                                            else
-                                                                                                if (is_f2 == 1 && is_f6 == 1 && is_f1 == 0 && is_f3 == 0 && is_f4 == 0 && is_f5 == 0)
-                                                                                                    nodes[m_volumes[From_3D_to_1D(cont, cont2,cont3, Nx,Ny)]] = 
-                                                                                                        From_3D_to_1D(c1, c2 + 1,c3 + 1,3 * Nx,3 * Ny)
-                                                                                                else
-                                                                                                    if (is_f2 == 1 && is_f3 == 1 && is_f5 == 1 && is_f1 == 0 && is_f4 == 0 && is_f6 == 0)
-                                                                                                        nodes[m_volumes[From_3D_to_1D(cont,cont2,cont3,Nx,Ny)]] = 
-                                                                                                            From_3D_to_1D(c1 - 1,c2 + 1,c3 - 1,3 * Nx,3 * Ny)
-                                                                                                    else
-                                                                                                        if (is_f2 == 1 && is_f3 == 1 && is_f6 == 1 && is_f1 == 0 && is_f4 == 0 && is_f5 == 0)
-                                                                                                            nodes[m_volumes[From_3D_to_1D(cont,cont2,cont3,Nx,Ny)]] = 
-                                                                                                                From_3D_to_1D(c1 - 1,c2 + 1,c3 + 1, 3 * Nx, 3 * Ny)
-                                                                                                        else
-                                                                                                            if (is_f2 == 1 && is_f4 == 1 && is_f5 == 1 && is_f1 == 0 && is_f3 == 0 && is_f6 == 0)
-                                                                                                                nodes[m_volumes[From_3D_to_1D(cont,cont2,cont3,Nx,Ny)]] = 
-                                                                                                                    From_3D_to_1D(c1 + 1,c2 + 1,c3 - 1,3 * Nx,3 * Ny)
-                                                                                                            else
-                                                                                                                if (is_f2 == 1 && is_f4 == 1 && is_f6 == 1 && is_f1 == 0 && is_f3 == 0 && is_f5 == 0)
-                                                                                                                    nodes[m_volumes[From_3D_to_1D( cont,cont2,cont3,Nx, Ny)]] = 
-                                                                                                                        From_3D_to_1D(c1 + 1,c2 + 1,c3 + 1,3 * Nx, 3 * Ny)
-                                                                                                                else
-                                                                                                                    if (is_f3 == 1 && is_f5 == 1 && is_f1 == 0 && is_f2 == 0 && is_f4 == 0 && is_f6 == 0)
-                                                                                                                        nodes[m_volumes[From_3D_to_1D(cont,cont2,cont3,Nx,Ny)]] = 
-                                                                                                                            From_3D_to_1D(c1 - 1,c2 ,c3 - 1,3 * Nx,3 * Ny)
-                                                                                                                    else
-                                                                                                                        if (is_f3 == 1 && is_f6 == 1 && is_f1 == 0 && is_f2 == 0 && is_f4 == 0 && is_f5 == 0)
-                                                                                                                            nodes[m_volumes[From_3D_to_1D(cont,cont2,cont3,Nx,Ny)]] = 
-                                                                                                                                From_3D_to_1D(c1 - 1,c2, c3 + 1,3 * Nx,3 * Ny)
-                                                                                                                        else
-                                                                                                                            if (is_f4 == 1 && is_f5 == 1 && is_f1 == 0 && is_f2 == 0 && is_f3 == 0 && is_f6 == 0)
-                                                                                                                                nodes[m_volumes[From_3D_to_1D(cont,cont2,cont3,Nx,Ny)]] = 
-                                                                                                                                    From_3D_to_1D(c1 + 1,c2,c3 - 1,3 * Nx,3 * Ny)
-                                                                                                                            else
-                                                                                                                                if (is_f4 == 1 && is_f6 == 1 && is_f1 == 0 && is_f2 == 0 && is_f3 == 0 && is_f5 == 0)
-                                                                                                                                    nodes[m_volumes[ From_3D_to_1D(cont,cont2,cont3,Nx,Ny)]] = 
-                                                                                                                                    From_3D_to_1D(c1 + 1,c2,c3 + 1,3 * Nx,3 * Ny)
-                                                                                                                                end
-                                                                                                                            end
-                                                                                                                        end
-                                                                                                                    end
-                                                                                                                end
-                                                                                                            end
-                                                                                                        end
-                                                                                                    end
-                                                                                                end
-                                                                                            end
-                                                                                        end
-                                                                                    end
-                                                                                end
-                                                                            end
-                                                                        end
-                                                                    end
-                                                                end
-                                                            end
-                                                        end
-                                                    end
-                                                end
-                                            end
-                                        end
+                        f1 = external_grids[k,1][cont,cont2,cont3]
+                        f2 = external_grids[k,2][cont,cont2,cont3]
+                        f3 = external_grids[k,3][cont,cont2,cont3]
+                        f4 = external_grids[k,4][cont,cont2,cont3]
+                        f5 = external_grids[k,5][cont,cont2,cont3]
+                        f6 = external_grids[k,6][cont,cont2,cont3]
+                        f1_c = false
+                        f2_c = false
+                        f3_c = false
+                        f4_c = false
+                        f5_c = false
+                        f6_c = false
+                        if cont2 - 1 > 1
+                            for k2 = 1:num_grids
+                                if k != k2
+                                    if external_grids[k2,2][cont,cont2 - 1,cont3]
+                                        f1_c = true
                                     end
                                 end
                             end
-                        else
-                            nodes[m_volumes[From_3D_to_1D( cont,cont2,cont3,Nx, Ny)]] = From_3D_to_1D(c1,c2,c3,3 * Nx, 3 * Ny)
                         end
-                        break
+                        if cont2 + 1 <= Ny
+                            for k2 = 1:num_grids
+                                if k != k2
+                                    if external_grids[k2,1][cont,cont2 + 1,cont3]
+                                        f2_c = true
+                                    end
+                                end
+                            end
+                        end
+                        if cont - 1 > 1
+                            for k2 = 1:num_grids
+                                if k != k2
+                                    if external_grids[k2,4][cont - 1,cont2,cont3]
+                                        f3_c = true
+                                    end
+                                end
+                            end
+                        end
+                        if cont + 1 <= Nx
+                            for k2 = 1:num_grids
+                                if k != k2
+                                    if external_grids[k2,3][cont + 1,cont2,cont3]
+                                        f4_c = true
+                                    end
+                                end
+                            end
+                        end
+                        if cont3 - 1 > 1
+                            for k2 = 1:num_grids
+                                if k != k2
+                                    if external_grids[k2,6][cont,cont2,cont3 - 1]
+                                        f5_c = true
+                                    end
+                                end
+                            end
+                        end
+                        if cont3 + 1 <= Nz
+                            for k2 = 1:num_grids
+                                if k != k2
+                                    if external_grids[k2,5][cont,cont2,cont3 + 1]
+                                        f6_c = true
+                                    end
+                                end
+                            end
+                        end
+                        is_f1 = f1
+                        is_f2 = f2
+                        if f1 && f2
+                            is_f1 = false
+                            is_f2 = false
+                            if f1_c && !f2_c
+                                is_f1 = true
+                            elseif !f1_c && f2_c
+                                is_f2 = true
+                            end
+                        end
+                        is_f3 = f3
+                        is_f4 = f4
+                        if f3 && f4
+                            is_f3 = false
+                            is_f4 = false
+                            if f3_c && !f4_c
+                                is_f3 = true
+                            elseif !f3_c && f4_c
+                                is_f4 = true
+                            end
+                        end
+                        is_f5 = f5
+                        is_f6 = f6
+                        if f5 && f6
+                            is_f5 = false
+                            is_f6 = false
+                            if f5_c && !f6_c
+                                is_f5 = true
+                            elseif !f5_c && f6_c
+                                is_f6 = true
+                            end
+                        end
+                        if any([is_f1 is_f2 is_f3 is_f4 is_f5 is_f6])
+                            if is_f1 && !is_f2 && !is_f3 && !is_f4 && !is_f5 && !is_f6
+                                nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1, c2 - 1, c3, 3 * Nx, 3 * Ny)
+                                cont_d += 1
+                                lista_nod[cont_d] = nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])]
+                            elseif is_f2 && !is_f1 && !is_f3 && !is_f4 && !is_f5 && !is_f6
+                                nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1, c2 + 1, c3, 3 * Nx, 3 * Ny)
+                                cont_d += 1
+                                lista_nod[cont_d] = nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])]
+                            elseif is_f3 && !is_f1 && !is_f2 && !is_f4 && !is_f5 && !is_f6
+                                nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1 - 1, c2, c3, 3 * Nx, 3 * Ny)
+                                cont_d += 1
+                                lista_nod[cont_d] = nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])]
+                            elseif is_f4 && !is_f1 && !is_f2 && !is_f3 && !is_f5 && !is_f6
+                                nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1 + 1, c2, c3, 3 * Nx, 3 * Ny)
+                                cont_d += 1
+                                lista_nod[cont_d] = nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])]
+                            elseif is_f5 && !is_f1 && !is_f2 && !is_f3 && !is_f4 && !is_f6
+                                nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1, c2, c3 - 1, 3 * Nx, 3 * Ny)
+                                cont_d += 1
+                                lista_nod[cont_d] = nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])]
+                            elseif is_f6 && !is_f1 && !is_f2 && !is_f3 && !is_f4 && !is_f5
+                                nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1, c2, c3 + 1, 3 * Nx, 3 * Ny)
+                                cont_d += 1
+                                lista_nod[cont_d] = nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])]
+                            elseif is_f1 && is_f3 && !is_f2 && !is_f4 && !is_f5 && !is_f6
+                                nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1 - 1, c2 - 1, c3, 3 * Nx, 3 * Ny)
+                                cont_d += 1
+                                lista_nod[cont_d] = nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])]
+                            elseif is_f1 && is_f4 && !is_f2 && !is_f3 && !is_f5 && !is_f6
+                                nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1 + 1, c2 - 1, c3, 3 * Nx, 3 * Ny)
+                                cont_d += 1
+                                lista_nod[cont_d] = nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])]
+                            elseif is_f1 && is_f5 && !is_f2 && !is_f3 && !is_f4 && !is_f6
+                                nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1, c2 - 1, c3 - 1, 3 * Nx, 3 * Ny)
+                                cont_d += 1
+                                lista_nod[cont_d] = nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])]
+                            elseif is_f1 && is_f6 && !is_f2 && !is_f3 && !is_f4 && !is_f5
+                                nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1, c2 - 1, c3 + 1, 3 * Nx, 3 * Ny)
+                                cont_d += 1
+                                lista_nod[cont_d] = nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])]
+                            elseif is_f1 && is_f3 && is_f5 && !is_f2 && !is_f4 && !is_f6
+                                nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1 - 1, c2 - 1, c3 - 1, 3 * Nx, 3 * Ny)
+                                cont_d += 1
+                                lista_nod[cont_d] = nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])]
+                            elseif is_f1 && is_f3 && is_f6 && !is_f2 && !is_f4 && !is_f5
+                                nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1 - 1, c2 - 1, c3 + 1, 3 * Nx, 3 * Ny)
+                                cont_d += 1
+                                lista_nod[cont_d] = nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])]
+                            elseif is_f1 && is_f4 && is_f5 && !is_f2 && !is_f3 && !is_f6
+                                nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1 + 1, c2 - 1, c3 - 1, 3 * Nx, 3 * Ny)
+                                cont_d += 1
+                                lista_nod[cont_d] = nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])]
+                            elseif is_f1 && is_f4 && is_f6 && !is_f2 && !is_f3 && !is_f5
+                                nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1 + 1, c2 - 1, c3 + 1, 3 * Nx, 3 * Ny)
+                                cont_d += 1
+                                lista_nod[cont_d] = nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])]
+                            elseif is_f2 && is_f3 && !is_f1 && !is_f4 && !is_f5 && !is_f6
+                                nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1 - 1, c2 + 1, c3, 3 * Nx, 3 * Ny)
+                                cont_d += 1
+                                lista_nod[cont_d] = nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])]
+                            elseif is_f2 && is_f4 && !is_f1 && !is_f3 && !is_f5 && !is_f6
+                                nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1 + 1, c2 + 1, c3, 3 * Nx, 3 * Ny)
+                                cont_d += 1
+                                lista_nod[cont_d] = nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])]
+                            elseif is_f2 && is_f5 && !is_f1 && !is_f3 && !is_f4 && !is_f6
+                                nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1, c2 + 1, c3 - 1, 3 * Nx, 3 * Ny)
+                                cont_d += 1
+                                lista_nod[cont_d] = nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])]
+                            elseif is_f2 && is_f6 && !is_f1 && !is_f3 && !is_f4 && !is_f5
+                                nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1, c2 + 1, c3 + 1, 3 * Nx, 3 * Ny)
+                                cont_d += 1
+                                lista_nod[cont_d] = nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])]
+                            elseif is_f2 && is_f3 && is_f5 && !is_f1 && !is_f4 && !is_f6
+                                nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1 - 1, c2 + 1, c3 - 1, 3 * Nx, 3 * Ny)
+                                cont_d += 1
+                                lista_nod[cont_d] = nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])]
+                            elseif is_f2 && is_f3 && is_f6 && !is_f1 && !is_f4 && !is_f5
+                                nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1 - 1, c2 + 1, c3 + 1, 3 * Nx, 3 * Ny)
+                                cont_d += 1
+                                lista_nod[cont_d] = nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])]
+                            elseif is_f2 && is_f4 && is_f5 && !is_f1 && !is_f3 && !is_f6
+                                nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1 + 1, c2 + 1, c3 - 1, 3 * Nx, 3 * Ny)
+                                cont_d += 1
+                                lista_nod[cont_d] = nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])]
+                            elseif is_f2 && is_f4 && is_f6 && !is_f1 && !is_f3 && !is_f5
+                                nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1 + 1, c2 + 1, c3 + 1, 3 * Nx, 3 * Ny)
+                                cont_d += 1
+                                lista_nod[cont_d] = nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])]
+                            elseif is_f3 && is_f5 && !is_f1 && !is_f2 && !is_f4 && !is_f6
+                                nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1 - 1, c2, c3 - 1, 3 * Nx, 3 * Ny)
+                                cont_d += 1
+                                lista_nod[cont_d] = nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])]
+                            elseif is_f3 && is_f6 && !is_f1 && !is_f2 && !is_f4 && !is_f5
+                                nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1 - 1, c2, c3 + 1, 3 * Nx, 3 * Ny)
+                                cont_d += 1
+                                lista_nod[cont_d] = nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])]
+                            elseif is_f4 && is_f5 && !is_f1 && !is_f2 && !is_f3 && !is_f6
+                                nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1 + 1, c2, c3 - 1, 3 * Nx, 3 * Ny)
+                                cont_d += 1
+                                lista_nod[cont_d] = nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])]
+                            elseif is_f4 && is_f6 && !is_f1 && !is_f2 && !is_f3 && !is_f5
+                                nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1 + 1, c2, c3 + 1, 3 * Nx, 3 * Ny)
+                                cont_d += 1
+                                lista_nod[cont_d] = nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])]
+                            end
+                        else
+                            nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1, c2, c3, 3 * Nx, 3 * Ny)
+                        end
                     end
                 end
             end
         end
     end
-            
-    nodes_red = sort(unique(nodes))
+    nodes_red_dom = sort(unique(lista_nod[1:cont_d]))
+    non_domin_list = setdiff(1:num_grids, dominant_list)
+    nodes_reused = zeros(num_full_vox)
+    cont_reu = 0
+    for ka in range(1,length(non_domin_list))
+        k = non_domin_list[ka]
+        for cont = 1:Nx
+            for cont2 = 1:Ny
+                for cont3 = 1:Nz
+                    if grids[k][cont][cont2][cont3]
+                        c1 = 1 + 2 * (cont - 1) + 1
+                        c2 = 1 + 2 * (cont2 - 1) + 1
+                        c3 = 1 + 2 * (cont3 - 1) + 1
+                        f1 = external_grids[k,1][cont,cont2,cont3]
+                        f2 = external_grids[k,2][cont,cont2,cont3]
+                        f3 = external_grids[k,3][cont,cont2,cont3]
+                        f4 = external_grids[k,4][cont,cont2,cont3]
+                        f5 = external_grids[k,5][cont,cont2,cont3]
+                        f6 = external_grids[k,6][cont,cont2,cont3]
+                        f1_c = false
+                        f2_c = false
+                        f3_c = false
+                        f4_c = false
+                        f5_c = false
+                        f6_c = false
+                        if cont2 - 1 > 1
+                            for k2 = 1:num_grids
+                                if k != k2
+                                    if external_grids[k2,2][cont,cont2 - 1,cont3]
+                                        f1_c = true
+                                    end
+                                end
+                            end
+                        end
+                        if cont2 + 1 <= Ny
+                            for k2 = 1:num_grids
+                                if k != k2
+                                    if external_grids[k2,1][cont,cont2 + 1,cont3]
+                                        f2_c = true
+                                    end
+                                end
+                            end
+                        end
+                        if cont - 1 > 1
+                            for k2 = 1:num_grids
+                                if k != k2
+                                    if external_grids[k2,4][cont - 1,cont2,cont3]
+                                        f3_c = true
+                                    end
+                                end
+                            end
+                        end
+                        if cont + 1 <= Nx
+                            for k2 = 1:num_grids
+                                if k != k2
+                                    if external_grids[k2,3][cont + 1,cont2,cont3]
+                                        f4_c = true
+                                    end
+                                end
+                            end
+                        end
+                        if cont3 - 1 > 1
+                            for k2 = 1:num_grids
+                                if k != k2
+                                    if external_grids[k2,6][cont,cont2,cont3 - 1]
+                                        f5_c = true
+                                    end
+                                end
+                            end
+                        end
+                        if cont3 + 1 <= Nz
+                            for k2 = 1:num_grids
+                                if k != k2
+                                    if external_grids[k2,5][cont,cont2,cont3 + 1]
+                                        f6_c = true
+                                    end
+                                end
+                            end
+                        end
+                        is_f1 = f1
+                        is_f2 = f2
+                        if f1 && f2
+                            is_f1 = false
+                            is_f2 = false
+                            if f1_c && !f2_c
+                                is_f1 = true
+                            elseif !f1_c && f2_c
+                                is_f2 = true
+                            end
+                        end
+                        is_f3 = f3
+                        is_f4 = f4
+                        if f3 && f4
+                            is_f3 = false
+                            is_f4 = false
+                            if f3_c && !f4_c
+                                is_f3 = true
+                            elseif !f3_c && f4_c
+                                is_f4 = true
+                            end
+                        end
+                        is_f5 = f5
+                        is_f6 = f6
+                        if f5 && f6
+                            is_f5 = false
+                            is_f6 = false
+                            if f5_c && !f6_c
+                                is_f5 = true
+                            elseif !f5_c && f6_c
+                                is_f6 = true
+                            end
+                        end
+                        if any([is_f1, is_f2, is_f3, is_f4, is_f5, is_f6])
+                            nodes_to_see = build_nodes(c1, c2, c3, 3*Nx, 3*Ny)
+                            nodo_shared, val_nodo = bin_search_mod(nodes_to_see, nodes_red_dom)
+                            if abs(nodo_shared) > 1e-8
+                                nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = val_nodo
+                                cont_reu += 1
+                                nodes_reused[cont_reu] = val_nodo
+                            else
+                                if is_f1 && !is_f2 && !is_f3 && !is_f4 && !is_f5 && !is_f6
+                                    nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1, c2-1, c3, 3*Nx, 3*Ny)
+                                elseif is_f2 && !is_f1 && !is_f3 && !is_f4 && !is_f5 && !is_f6
+                                    nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1, c2+1, c3, 3*Nx, 3*Ny)
+                                elseif is_f3 && !is_f1 && !is_f2 && !is_f4 && !is_f5 && !is_f6
+                                    nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1-1, c2, c3, 3*Nx, 3*Ny)
+                                elseif is_f4 && !is_f1 && !is_f2 && !is_f3 && !is_f5 && !is_f6
+                                    nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1+1, c2, c3, 3*Nx, 3*Ny)
+                                elseif is_f5 && !is_f1 && !is_f2 && !is_f3 && !is_f4 && !is_f6
+                                    nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1, c2, c3-1, 3*Nx, 3*Ny)
+                                elseif is_f6 && !is_f1 && !is_f2 && !is_f3 && !is_f4 && !is_f5
+                                    nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1, c2, c3+1, 3*Nx, 3*Ny)
+                                elseif is_f1 && is_f3 && !is_f2 && !is_f4 && !is_f5 && !is_f6
+                                    nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1-1, c2-1, c3, 3*Nx, 3*Ny)
+                                elseif is_f1 && is_f4 && !is_f2 && !is_f3 && !is_f5 && !is_f6
+                                    nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1+1, c2-1, c3, 3*Nx, 3*Ny)
+                                elseif is_f1 && is_f5 && !is_f2 && !is_f3 && !is_f4 && !is_f6
+                                    nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1, c2-1, c3-1, 3*Nx, 3*Ny)
+                                elseif is_f1 && is_f6 && !is_f2 && !is_f3 && !is_f4 && !is_f5
+                                    nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1, c2-1, c3+1, 3*Nx, 3*Ny)
+                                elseif is_f1 && is_f3 && is_f5 && !is_f2 && !is_f4 && !is_f6
+                                    nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1-1, c2-1, c3-1, 3*Nx, 3*Ny)
+                                elseif is_f1 && is_f3 && is_f6 && !is_f2 && !is_f4 && !is_f5
+                                    nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1-1, c2-1, c3+1, 3*Nx, 3*Ny)
+                                elseif is_f1 && is_f4 && is_f5 && !is_f2 && !is_f3 && !is_f6
+                                    nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1+1, c2-1, c3-1, 3*Nx, 3*Ny)
+                                elseif is_f1 && is_f4 && is_f6 && !is_f2 && !is_f3 && !is_f5
+                                    nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1+1, c2-1, c3+1, 3*Nx, 3*Ny)
+                                elseif is_f2 && is_f3 && !is_f1 && !is_f4 && !is_f5 && !is_f6
+                                    nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1-1, c2+1, c3, 3*Nx, 3*Ny)
+                                elseif is_f2 && is_f4 && !is_f1 && !is_f3 && !is_f5 && !is_f6
+                                    nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1+1, c2+1, c3, 3*Nx, 3*Ny)
+                                elseif is_f2 && is_f5 && !is_f1 && !is_f3 && !is_f4 && !is_f6
+                                    nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1, c2+1, c3-1, 3*Nx, 3*Ny)
+                                elseif is_f2 && is_f6 && !is_f1 && !is_f3 && !is_f4 && !is_f5
+                                    nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1, c2+1, c3+1, 3*Nx, 3*Ny)
+                                elseif is_f2 && is_f3 && is_f5 && !is_f1 && !is_f4 && !is_f6
+                                    nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1-1, c2+1, c3-1, 3*Nx, 3*Ny)
+                                elseif is_f2 && is_f3 && is_f6 && !is_f1 && !is_f4 && !is_f5
+                                    nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1-1, c2+1, c3+1, 3*Nx, 3*Ny)
+                                elseif is_f2 && is_f4 && is_f5 && !is_f1 && !is_f3 && !is_f6
+                                    nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1+1, c2+1, c3-1, 3*Nx, 3*Ny)
+                                elseif is_f2 && is_f4 && is_f6 && !is_f1 && !is_f3 && !is_f5
+                                    nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1+1, c2+1, c3+1, 3*Nx, 3*Ny)
+                                elseif is_f3 && is_f5 && !is_f1 && !is_f2 && !is_f4 && !is_f6
+                                    nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1-1, c2, c3-1, 3*Nx, 3*Ny)
+                                elseif is_f3 && is_f6 && !is_f1 && !is_f2 && !is_f4 && !is_f5
+                                    nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1-1, c2, c3+1, 3*Nx, 3*Ny)
+                                elseif is_f4 && is_f5 && !is_f1 && !is_f2 && !is_f3 && !is_f6
+                                    nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1+1, c2, c3-1, 3*Nx, 3*Ny)
+                                elseif is_f4 && is_f6 && !is_f1 && !is_f2 && !is_f3 && !is_f5
+                                    nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1+1, c2, c3+1, 3*Nx, 3*Ny)
+                                end
+                            end
+                        else
+                            nodes[convert(Int64,mapping_vols[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])] = From_3D_to_1D(c1, c2, c3, 3*Nx, 3*Ny)
+                        end
+                    end
+                end
+            end
+        end
+    end
 
-    return nodes_red,nodes
+    nodes_red = sort(unique(nodes))
+    nodes_reused_clean = sort(unique(nodes_reused[1:cont_reu]))
+
+    return nodes,nodes_red,nodes_reused_clean
 end
 
 #Aggiornata
@@ -411,90 +639,100 @@ function create_external_grids(matrice,Nx,Ny,Nz)
     return OUTPUTgrids
 end
 
-#Non sostituita
-function create_mapping_Ax(matrice,Nx,Ny,Nz)
-    num_grids = size(matrice)[1]
-
-    N_max = ((Nx - 1) * Ny * Nz)
+#Aggiornata
+function create_mapping_Ax(grids, mapping_Vox, nodes, nodes_red)
+    num_grids = length(grids)
+    Nx = size(grids[1],1)
+    Ny = size(grids[1][1],1)
+    Nz = size(grids[1][1][1],1)
+    N_max = (Nx-1)*Ny*Nz
     mapping = zeros(Int64, N_max)
-
     num_ele = 0
-
-    for cont2 in range(1, stop=Ny)
-        for cont3 in range(1, stop=Nz)
-            for cont in range(1, stop=Nx-1)
-                for k in range(1, stop=num_grids)
-                    if ((matrice[k][cont][cont2][cont3]==1) && (matrice[k][cont+1][cont2][cont3]==1))
-                        kkey = From_3D_to_1D(cont, cont2, cont3, Nx - 1, Ny)
-                        if mapping[kkey] == 0
-                            mapping[kkey] = num_ele
-                            num_ele = num_ele + 1
+    for cont2=1:Ny
+        for cont3=1:Nz
+            for cont=1:Nx-1
+                for k in 1:num_grids
+                    if grids[k][cont][cont2][cont3] && grids[k][cont+1][cont2][cont3]
+                        nn1 = bin_search(nodes[convert(Int64,mapping_Vox[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])], nodes_red)
+                        nn2 = bin_search(nodes[convert(Int64,mapping_Vox[From_3D_to_1D(cont+1, cont2, cont3, Nx, Ny)])], nodes_red)
+                        if abs(nn1-nn2) > 1e-8
+                            kkey = From_3D_to_1D(cont, cont2, cont3, Nx-1, Ny)
+                            if mapping[kkey] == 0
+                                num_ele += 1
+                                mapping[kkey] = num_ele
+                            end
+                            break
                         end
-                        break
                     end
                 end
             end
         end
     end
-
-    return mapping,num_ele
+    return mapping, num_ele
 end
 
-#Non sostituita
-function create_mapping_Ay(matrice,Nx,Ny,Nz)
-    num_grids = size(matrice)[1]
-
-    N_max = ( Nx * (Ny - 1) * Nz)
-    mapping = zeros(Int64 ,N_max)
-
+#Aggiornata
+function create_mapping_Ay(grids, mapping_Vox, nodes, nodes_red)
+    num_grids = length(grids)
+    Nx = size(grids[1],1)
+    Ny = size(grids[1][1],1)
+    Nz = size(grids[1][1][1],1)
+    N_max = Nx * (Ny - 1) * Nz
+    mapping = zeros(Int64, N_max)
     num_ele = 0
-
-    for cont3 in range(1, stop=Nz)
-        for cont in range(1, stop=Nx)
-            for cont2 in range(1, stop=Ny - 1)
-                for k in range(1, stop=num_grids)
-                    if((matrice[k][cont][cont2][cont3]==1) && (matrice[k][cont][cont2+1][cont3]==1))
-                        kkey = From_3D_to_1D(cont, cont2, cont3, Nx, Ny - 1)
-                        if mapping[kkey] == 0
-                           mapping[kkey] = num_ele
-                           num_ele = num_ele + 1
+    for cont3 in 1:Nz
+        for cont in 1:Nx
+            for cont2 in 1:Ny-1
+                for k in 1:num_grids
+                    if grids[k][cont][cont2][cont3] && grids[k][cont][cont2+1][cont3]
+                        nn1 = bin_search(nodes[convert(Int64,mapping_Vox[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])], nodes_red)
+                        nn2 = bin_search(nodes[convert(Int64,mapping_Vox[From_3D_to_1D(cont, cont2+1, cont3, Nx, Ny)])], nodes_red)
+                        if abs(nn1 - nn2) > 1e-8
+                            kkey = From_3D_to_1D(cont, cont2, cont3, Nx, Ny-1)
+                            if mapping[kkey] == 0
+                                num_ele += 1
+                                mapping[kkey] = num_ele
+                            end
+                            break
                         end
-                        break
                     end
                 end
             end
         end
     end
-
-    return mapping,num_ele
+    return mapping, num_ele
 end
 
-#Non sostituita
-function create_mapping_Az(matrice,Nx,Ny,Nz)
-    num_grids = size(matrice)[1]
-    N_max = ( Nx * Ny * (Nz - 1) )
+#Aggiornata
+function create_mapping_Az(grids, mapping_Vox, nodes, nodes_red)
+    num_grids = length(grids)
+    Nx = size(grids[1],1)
+    Ny = size(grids[1][1],1)
+    Nz = size(grids[1][1][1],1)
+    N_max = Nx * Ny * (Nz - 1)
     mapping = zeros(Int64, N_max)
-
     num_ele = 0
-
-    for cont in range(1, stop=Nx)
-        for cont2 in range(1, stop=Ny)
-            for cont3 in range(1, stop=Nz - 1)
-                for k in range(1, stop=num_grids)
-                    if((matrice[k][cont][cont2][cont3]==1) && (matrice[k][cont][cont2][cont3+1]==1))
-                        kkey = From_3D_to_1D(cont, cont2, cont3, Nx, Ny)
-                        if mapping[kkey] == 0
-                           mapping[kkey] = num_ele
-                           num_ele = num_ele + 1
+    for cont = 1:Nx
+        for cont2 = 1:Ny
+            for cont3 = 1:Nz-1
+                for k = 1:num_grids
+                    if grids[k][cont][cont2][cont3] && grids[k][cont][cont2][cont3+1]
+                        nn1 = bin_search(nodes[convert(Int64,mapping_Vox[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)])], nodes_red)
+                        nn2 = bin_search(nodes[convert(Int64,mapping_Vox[From_3D_to_1D(cont, cont2, cont3+1, Nx, Ny)])], nodes_red)
+                        if abs(nn1-nn2) > 1e-8
+                            kkey = From_3D_to_1D(cont, cont2, cont3, Nx, Ny)
+                            if mapping[kkey] == 0
+                                num_ele += 1
+                                mapping[kkey] = num_ele
+                            end
+                            break
                         end
-                        break
                     end
                 end
             end
         end
     end
-
-    return mapping,num_ele
+    return mapping, num_ele
 end
 
 #Non sostituita
@@ -702,139 +940,141 @@ function create_A_mats_volInd(matrice,Nx,Ny,Nz,mapping_Vox,mapAx, NAx, mapAy, NA
     return ind_row,ind_col,vals_A,lix_mat,liy_mat,liz_mat,lix_border,liy_border,liz_border,bars_Lp_x,bars_Lp_y,bars_Lp_z
 end
 
-#Non sostituita
-function ver_con(A,B)
-    return vcat(A,B)
-end
 
-#Non sostituita
-function compute_diagonals(MATER,sx,sy,sz,lix_mat,liy_mat,liz_mat,lix_border,liy_border,liz_border)
+#Aggiornata
+function compute_diagonals(escalings, materials, sx, sy, sz, lix_mat, liy_mat, liz_mat, lix_border, liy_border, liz_border)
+    escaling_R = escalings.R
+    escaling_Cd = escalings.Cd
+    escaling_Lp = escalings.Lp
     eps0 = 8.854187816997944e-12
-    num_grids = length(MATER)
-    for cont in range(1, stop=num_grids)
-        sigmar = MATER[cont].conductivity
-        epsr = MATER[cont].permittivity 
-        if sigmar!=0
-            MATER[cont].Rx = 0.5 * sx / (sigmar * sy * sz)
-            MATER[cont].Ry = 0.5 * sy / (sigmar * sx * sz)
-            MATER[cont].Rz = 0.5 * sz / (sigmar * sy * sx)
+    for cont in range(1,length(materials))
+        sigmar = materials[cont].sigmar
+        epsr = materials[cont].epsr
+        if sigmar != 0
+            materials[cont].Rx = 0.5 * sx / (sigmar * sy * sz)
+            materials[cont].Ry = 0.5 * sy / (sigmar * sx * sz)
+            materials[cont].Rz = 0.5 * sz / (sigmar * sy * sx)
             if epsr == 1
-                MATER[cont].Cx = 0.0
-                MATER[cont].Cy = 0.0
-                MATER[cont].Cz = 0.0
+                materials[cont].Cx = 0
+                materials[cont].Cy = 0
+                materials[cont].Cz = 0
             else
-                MATER[cont].Cx = eps0 * (epsr - 1.0) * sy * sz / (0.5 * sx)
-                MATER[cont].Cy = eps0 * (epsr - 1.0) * sx * sz / (0.5 * sy)
-                MATER[cont].Cz = eps0 * (epsr - 1.0) * sy * sx / (0.5 * sz)
+                materials[cont].Cx = eps0 * (epsr - 1) * sy * sz / (0.5 * sx)
+                materials[cont].Cy = eps0 * (epsr - 1) * sx * sz / (0.5 * sy)
+                materials[cont].Cz = eps0 * (epsr - 1) * sy * sx / (0.5 * sz)
             end
         else
-            MATER[cont].Rx = 0.0
-            MATER[cont].Ry = 0.0
-            MATER[cont].Rz = 0.0
-            MATER[cont].Cx = eps0 * (epsr - 1.0) * sy * sz / (0.5 * sx)
-            MATER[cont].Cy = eps0 * (epsr - 1.0) * sx * sz / (0.5 * sy)
-            MATER[cont].Cz = eps0 * (epsr - 1.0) * sy * sx / (0.5 * sz)
+            epsr = materials[cont].epsr
+            materials[cont].Rx = 0
+            materials[cont].Ry = 0
+            materials[cont].Rz = 0
+            materials[cont].Cx = eps0 * (epsr - 1) * sy * sz / (0.5 * sx)
+            materials[cont].Cy = eps0 * (epsr - 1) * sx * sz / (0.5 * sy)
+            materials[cont].Cz = eps0 * (epsr - 1) * sy * sx / (0.5 * sz)
         end
     end
-    Rx = zeros(Complex ,(size(lix_border)[1], 4))
-    Ry = zeros(Complex ,(size(liy_border)[1], 4))
-    Rz = zeros(Complex ,(size(liz_border)[1], 4))
-
-    Cx = zeros(Complex ,(size(lix_border)[1], 4))
-    Cy = zeros(Complex ,(size(liy_border)[1], 4))
-    Cz = zeros(Complex ,(size(liz_border)[1], 4))
-
-    for cont in range(1, stop=num_grids)
-        if MATER[cont].Rx!=0
-            ind_m = findall(l -> (cont+1) == l, lix_mat[:, 1])
-            #ind_m = filter(i -> i!=1, ind_m)
-            Rx[ind_m, 1] .= MATER[cont].Rx
-            ind_m = findall(l -> (cont+1) == l, lix_mat[:, 2])
-            #ind_m = filter(i -> i!=1, ind_m)
-            Rx[ind_m, 2] .= MATER[cont].Rx
-            ind_m = findall(l -> (cont+1) == l, lix_border[:, 1])
-            #ind_m = filter(i -> i!=1, ind_m)
-            Rx[ind_m, 3] .= MATER[cont].Rx
-            ind_m = findall(l -> (cont+1) == l, lix_border[:, 2])
-            #ind_m = filter(i -> i!=1, ind_m)
-            Rx[ind_m, 4] .= MATER[cont].Rx
+    Rx = zeros(size(lix_border,1), 4)
+    Ry = zeros(size(liy_border,1), 4)
+    Rz = zeros(size(liz_border,1), 4)
+    Cx = zeros(size(lix_border,1), 4)
+    Cy = zeros(size(liy_border,1), 4)
+    Cz = zeros(size(liz_border,1), 4)
+    for cont in range(1,length(materials))
+        if materials[cont].Rx != 0
+            ind_m = findall(x -> x == cont, lix_mat[:, 1])
+            Rx[ind_m, 1] .= materials[cont].Rx
+            ind_m = findall(x -> x == cont, lix_mat[:, 2])
+            Rx[ind_m, 2] .= materials[cont].Rx
+            ind_m = findall(x -> x == cont, lix_border[:, 1])
+            Rx[ind_m, 3] .= materials[cont].Rx
+            ind_m = findall(x -> x == cont, lix_border[:, 2])
+            Rx[ind_m, 4] .= +materials[cont].Rx
         end
-        if MATER[cont].Cx!=0
-            ind_m = findall(l -> (cont+1) == l, lix_mat[:, 1])
-            #ind_m = filter(i -> i!=1, ind_m)
-            Cx[ind_m, 1] .= MATER[cont].Cx
-            ind_m = findall(l -> (cont+1) == l, lix_mat[:, 2])
-            #ind_m = filter(i -> i!=1, ind_m)
-            Cx[ind_m, 2] .= MATER[cont].Cx
-            ind_m = findall(l -> (cont+1) == l, lix_border[:, 1])
-            #ind_m = filter(i -> i!=1, ind_m)
-            Cx[ind_m, 3] .= MATER[cont].Cx
-            ind_m = findall(l -> (cont+1) == l, lix_border[:, 2])
-            #ind_m = filter(i -> i!=1, ind_m)
-            Cx[ind_m, 4] .= MATER[cont].Cx
+        if materials[cont].Cx != 0
+            ind_m = findall(x -> x == cont, lix_mat[:, 1])
+            Cx[ind_m, 1] .= materials[cont].Cx
+            ind_m = findall(x -> x == cont, lix_mat[:, 2])
+            Cx[ind_m, 2] .= materials[cont].Cx
+            ind_m = findall(x -> x == cont, lix_border[:, 1])
+            Cx[ind_m, 3] .= materials[cont].Cx
+            ind_m = findall(x -> x == cont, lix_border[:, 2])
+            Cx[ind_m, 4] .= +materials[cont].Cx
         end
-        if MATER[cont].Ry!=0
-            ind_m = findall(l -> (cont+1) == l, liy_mat[:, 1])
-            #ind_m = filter(i -> i!=1, ind_m)
-            Ry[ind_m, 1] .= MATER[cont].Ry
-            ind_m = findall(l -> (cont+1) == l, liy_mat[:, 2])
-            #ind_m = filter(i -> i!=1, ind_m)
-            Ry[ind_m, 2] .= MATER[cont].Ry
-            ind_m = findall(l -> (cont+1) == l, liy_border[:, 1])
-            #ind_m = filter(i -> i!=1, ind_m)
-            Ry[ind_m, 3] .= MATER[cont].Ry
-            ind_m = findall(l -> (cont+1) == l, liy_border[:, 2])
-            #ind_m = filter(i -> i!=1, ind_m)
-            Ry[ind_m, 4] .= MATER[cont].Ry
+        if materials[cont].Ry != 0
+            ind_m = findall(x -> x == cont, liy_mat[:, 1])
+            Ry[ind_m, 1] .= materials[cont].Ry
+            ind_m = findall(x -> x == cont, liy_mat[:, 2])
+            Ry[ind_m, 2] .= materials[cont].Ry
+            ind_m = findall(x -> x == cont, liy_border[:, 1])
+            Ry[ind_m, 3] .= materials[cont].Ry
+            ind_m = findall(x -> x == cont, liy_border[:, 2])
+            Ry[ind_m, 4] .= +materials[cont].Ry
         end
-        if MATER[cont].Cy!=0
-            ind_m = findall(l -> (cont+1) == l, liy_mat[:, 1])
-            #ind_m = filter(i -> i!=1, ind_m)
-            Cy[ind_m, 1] .= MATER[cont].Cy
-            ind_m = findall(l -> (cont+1) == l, liy_mat[:, 2])
-            #ind_m = filter(i -> i!=1, ind_m)
-            Cy[ind_m, 2] .= MATER[cont].Cy
-            ind_m = findall(l -> (cont+1) == l, liy_border[:, 1])
-            #ind_m = filter(i -> i!=1, ind_m)
-            Cy[ind_m, 3] .= MATER[cont].Cy
-            ind_m = findall(l -> (cont+1) == l, liy_border[:, 2])
-            #ind_m = filter(i -> i!=1, ind_m)
-            Cy[ind_m, 4] .= MATER[cont].Cy
+        if materials[cont].Cy != 0
+            ind_m = findall(x -> x == cont, liy_mat[:, 1])
+            Cy[ind_m, 1] .= materials[cont].Cy
+            ind_m = findall(x -> x == cont, liy_mat[:, 2])
+            Cy[ind_m, 2] .= materials[cont].Cy
+            ind_m = findall(x -> x == cont, liy_border[:, 1])
+            Cy[ind_m, 3] .= materials[cont].Cy
+            ind_m = findall(x -> x == cont, liy_border[:, 2])
+            Cy[ind_m, 4] .= +materials[cont].Cy
         end
-        if MATER[cont].Rz!=0
-            ind_m = findall(l -> (cont+1) == l, liz_mat[:, 1])
-            #ind_m = filter(i -> i!=1, ind_m)
-            Rz[ind_m, 1] .= MATER[cont].Rz
-            ind_m = findall(l -> (cont+1) == l, liz_mat[:, 2])
-            #ind_m = filter(i -> i!=1, ind_m)
-            Rz[ind_m, 2] .= MATER[cont].Rz
-            ind_m = findall(l -> (cont+1) == l, liz_border[:, 1])
-            #ind_m = filter(i -> i!=1, ind_m)
-            Rz[ind_m, 3] .= MATER[cont].Rz
-            ind_m = findall(l -> (cont+1) == l, liz_border[:, 2])
-            #ind_m = filter(i -> i!=1, ind_m)
-            Rz[ind_m, 4] .= MATER[cont].Rz
+        if materials[cont].Rz != 0
+            ind_m = findall(x -> x == cont, liz_mat[:, 1])
+            Rz[ind_m, 1] .= materials[cont].Rz
+            ind_m = findall(x -> x == cont, liz_mat[:, 2])
+            Rz[ind_m, 2] .= materials[cont].Rz
+            ind_m = findall(x -> x == cont, liz_border[:, 1])
+            Rz[ind_m, 3] .= materials[cont].Rz
+            ind_m = findall(x -> x == cont, liz_border[:, 2])
+            Rz[ind_m, 4] .= +materials[cont].Rz
         end
-        if MATER[cont].Cz!=0
-            ind_m = findall(l -> (cont+1) == l, liz_mat[:, 1])
-            #ind_m = filter(i -> i!=1, ind_m)
-            Cz[ind_m, 1] .= MATER[cont].Cz
-            ind_m = findall(l -> (cont+1) == l, liz_mat[:, 2])
-            #ind_m = filter(i -> i!=1, ind_m)
-            Cz[ind_m, 2] .= MATER[cont].Cz
-            ind_m = findall(l -> (cont+1) == l, liz_border[:, 1])
-            #ind_m = filter(i -> i!=1, ind_m)
-            Cz[ind_m, 3] .= MATER[cont].Cz
-            ind_m = findall(l -> (cont+1) == l, liz_border[:, 2])
-            #ind_m = filter(i -> i!=1, ind_m)
-            Cz[ind_m, 4] .= MATER[cont].Cz
+        if materials[cont].Cz != 0
+            ind_m = findall(x -> x == cont, liz_mat[:, 1])
+            Cz[ind_m, 1] .= materials[cont].Cz
+            ind_m = findall(x -> x == cont, liz_mat[:, 2])
+            Cz[ind_m, 2] .= materials[cont].Cz
+            ind_m = findall(x -> x == cont, liz_border[:, 1])
+            Cz[ind_m, 3] .= materials[cont].Cz
+            ind_m = findall(x -> x == cont, liz_border[:, 2])
+            Cz[ind_m, 4] .= +materials[cont].Cz
         end
     end
-    diag_R = ver_con(ver_con(Rx, Ry), Rz)
-    diag_Cd = ver_con(ver_con(Cx, Cy), Cz)
+    lix_aux = ceil.(Int, lix_border[:, 1] / 100) + ceil.(Int, lix_border[:, 2] / 100)
+    liy_aux = ceil.(Int, liy_border[:, 1] / 100) + ceil.(Int, liy_border[:, 2] / 100)
+    liz_aux = ceil.(Int, liz_border[:, 1] / 100) + ceil.(Int, liz_border[:, 2] / 100)
+    i1x = findall(x -> x == 1, lix_aux)
+    i2x = findall(x -> x == 2, lix_aux)
+    i1y = findall(x -> x == 1, liy_aux)
+    i2y = findall(x -> x == 2, liy_aux)
+    i1z = findall(x -> x == 1, liz_aux)
+    i2z = findall(x -> x == 2, liz_aux)
+    Self_x = Lp_self(sx, sy, sz)
+    Self_y = Lp_self(sy, sx, sz)
+    Self_z = Lp_self(sz, sy, sx)
+    Self_x1 = Lp_self(sx + sx / 2, sy, sz)
+    Self_y1 = Lp_self(sy + sy / 2, sx, sz)
+    Self_z1 = Lp_self(sz + sz / 2, sy, sx)
+    Self_x2 = Lp_self(2 * sx, sy, sz)
+    Self_y2 = Lp_self(2 * sy, sx, sz)
+    Self_z2 = Lp_self(2 * sz, sy, sx)
+    diag_Lp_x = Self_x * ones(size(lix_aux, 1), 1)
+    diag_Lp_y = Self_y * ones(size(liy_aux, 1), 1)
+    diag_Lp_z = Self_z * ones(size(liz_aux, 1), 1)
+    diag_Lp_x[i1x] = Self_x1 * ones(length(i1x), 1)
+    diag_Lp_y[i1y] = Self_y1 * ones(length(i1y), 1)
+    diag_Lp_z[i1z] = Self_z1 * ones(length(i1z), 1)
+    diag_Lp_x[i2x] = Self_x2 * ones(length(i2x), 1)
+    diag_Lp_y[i2y] = Self_y2 * ones(length(i2y), 1)
+    diag_Lp_z[i2z] = Self_z2 * ones(length(i2z), 1)
+    diagonals = Dict()
+    diagonals["R"] = escaling_R * [Rx; Ry; Rz]
+    diagonals["Cd"] = escaling_Cd * [Cx; Cy; Cz]
+    diagonals["Lp"] = escaling_Lp * [diag_Lp_x; diag_Lp_y; diag_Lp_z]
+    diagonals["fc_Lp"] = escaling_Lp * ([diag_Lp_x; diag_Lp_y; diag_Lp_z] - [Self_x * ones(size(lix_aux, 1), 1); Self_y * ones(size(liy_aux, 1), 1); Self_z * ones(size(liz_aux, 1), 1)])
 
-
-    return diag_R, diag_Cd
+    return diagonals
 end
 
 #Non sostituita
@@ -1174,7 +1414,9 @@ function create_Gamma_and_center_sup(matrice, Nx,Ny,Nz, map_volumes, min_v, sx, 
 end
 
 
-function generate_interconnection_matrices_and_centers(size_x,size_y,size_z,grid_matrix,num_cel_x,num_cel_y,num_cel_z,materials,port_matrix,lumped_el_matrix,minimum_vertex)
+function generate_interconnection_matrices_and_centers(escalings,size_x,size_y,size_z,grid_matrix,num_cel_x,num_cel_y,num_cel_z,materials,port_matrix,lumped_el_matrix,minimum_vertex)
+
+    dominant_list=1;
 
     numTotVox = num_cel_x*num_cel_y*num_cel_z
     
@@ -1208,7 +1450,7 @@ function generate_interconnection_matrices_and_centers(size_x,size_y,size_z,grid
 
     externals_grids = create_external_grids(grid_matrix,num_cel_x,num_cel_y,num_cel_z)
     
-    nodes_red, nodes = create_nodes_ref(grid_matrix,num_cel_x,num_cel_y,num_cel_z,num_tot_full_vox,externals_grids,mapping_vols)
+    nodes_red, nodes = create_nodes_ref(grid_matrix,num_cel_x,num_cel_y,num_cel_z,num_tot_full_vox,externals_grids,mapping_vols, dominant_list)
 
     port_matrix.port_voxels, port_matrix.port_nodes = find_nodes_port(volume_centers, port_matrix.port_start, port_matrix.port_end, nodes, nodes_red)
         
@@ -1221,9 +1463,9 @@ function generate_interconnection_matrices_and_centers(size_x,size_y,size_z,grid
 
     println("Number of Surfaces (without air):", size(Gamma)[2])
 
-    map_for_Ax, n_for_Ax = create_mapping_Ax(grid_matrix,num_cel_x,num_cel_y,num_cel_z)
-    map_for_Ay, n_for_Ay = create_mapping_Ay(grid_matrix,num_cel_x,num_cel_y,num_cel_z)
-    map_for_Az, n_for_Az = create_mapping_Az(grid_matrix,num_cel_x,num_cel_y,num_cel_z)
+    map_for_Ax, n_for_Ax = create_mapping_Ax(grid_matrix,mapping_vols, nodes, nodes_red)
+    map_for_Ay, n_for_Ay = create_mapping_Ay(grid_matrix,mapping_vols, nodes, nodes_red)
+    map_for_Az, n_for_Az = create_mapping_Az(grid_matrix,mapping_vols, nodes, nodes_red)
 
     ind_row,ind_col,vals_A, LiX, LiY, LiZ, LiX_bord,LiY_bord,LiZ_bord,bars_Lp_x,bars_Lp_y,bars_Lp_z = create_A_mats_volInd(grid_matrix,num_cel_x,num_cel_y,num_cel_z,mapping_vols,
                                        map_for_Ax, n_for_Ax, map_for_Ay, n_for_Ay, map_for_Az, n_for_Az,
@@ -1236,8 +1478,8 @@ function generate_interconnection_matrices_and_centers(size_x,size_y,size_z,grid
     println("Edges without air:", n_for_Ax+n_for_Ay+n_for_Az)
     println("Nodes without air:", size(Gamma)[1])
 
-    diag_R,diag_Cd=compute_diagonals(materials, size_x,size_y,size_z, LiX, LiY, LiZ,LiX_bord, LiY_bord, LiZ_bord)
+    diagonals=compute_diagonals(escalings, materials, size_x,size_y,size_z, LiX, LiY, LiZ,LiX_bord, LiY_bord, LiZ_bord)
     
 
-    return A, Gamma, port_matrix, lumped_el_matrix, sup_centers, sup_type, bars_Lp_x, bars_Lp_y, bars_Lp_z, diag_R, diag_Cd
+    return A, Gamma, port_matrix, lumped_el_matrix, sup_centers, sup_type, bars_Lp_x, bars_Lp_y, bars_Lp_z, diagonals["R"], diagonals["Cd"]
 end

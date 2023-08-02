@@ -26,9 +26,6 @@ struct gmers_counter
     niter
 end
 
-function ver_con(A,B)
-    return vcat(A,B)
-end
 
 function compute_Z_self(R,Cd,w)
     len_R=size(R)[1]
@@ -630,10 +627,7 @@ function ComputeMatrixVector(w,escalings,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,Lp_z_ma
     return MatrixVector
 end
 
-function Quasi_static_iterative_solver(freq_in,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,Lp_z_mat,diag_R,diag_Cd,ports,lumped_elements,GMRES_settings, client)
-
-    #escalings = escals(1e6, 1e-12, 1e-3, 1e12, 1e3, 1e3, 1e-9) #mettere tutto a 1 per scrivere il file
-    escalings = escals(1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
+function Quasi_static_iterative_solver(escalings, freq_in,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,Lp_z_mat,diag_R,diag_Cd,ports,lumped_elements,GMRES_settings, client)
 
     freq = freq_in * escalings.freq
     # GMRES settings - ---------------------------

@@ -302,6 +302,7 @@ function doSolving(mesherOutput, solverInput, solverAlgoParams, client)
     mesherDict = Dict(mesherOutput)
     unit = solverInput["unit"]
     escal = getEscalFrom(unit)
+    escalings = escals(1e6, 1e-12, 1e-3, 1e12, 1e3, 1e3, 1e-9)
     
     
     sx, sy, sz = mesherDict["cell_size"]["cell_size_x"]*1000*escal,mesherDict["cell_size"]["cell_size_y"]*1000*escal,mesherDict["cell_size"]["cell_size_z"]*1000*escal
@@ -362,7 +363,7 @@ function doSolving(mesherOutput, solverInput, solverAlgoParams, client)
     # # END SETTINGS----------------------------------------------
 
     A, Gamma, ports, lumped_elements, sup_centers, sup_type, bars_Lp_x, bars_Lp_y, bars_Lp_z, diag_R, diag_Cd = generate_interconnection_matrices_and_centers(
-        sx,sy,sz,grids,Nx,Ny,Nz,MATERIALS,PORTS,L_ELEMENTS,origin)  
+        escalings,sx,sy,sz,grids,Nx,Ny,Nz,MATERIALS,PORTS,L_ELEMENTS,origin)  
 
    
     println("Time for P")
@@ -403,7 +404,7 @@ function doSolving(mesherOutput, solverInput, solverAlgoParams, client)
     
 
     println("Time for solver algo")
-    Z, Y, S = @time Quasi_static_iterative_solver(frequencies,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,Lp_z_mat,diag_R,diag_Cd,ports,lumped_elements,GMRES_settings, client)
+    Z, Y, S = @time Quasi_static_iterative_solver(escalings, frequencies,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,Lp_z_mat,diag_R,diag_Cd,ports,lumped_elements,GMRES_settings, client)
     close(client)
     return dump_json_data(Z,S,Y, length(inputDict["ports"]))
 end
