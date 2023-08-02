@@ -518,124 +518,157 @@ function find_nodes_port(nodi_centri, port_start, port_end, nodi, nodi_red)
     return port_voxels, port_nodes
 end
 
-#Non sostituita
-function create_external_grids(matrice,Nx,Ny,Nz)
-    num_grids = size(matrice)[1]
+#Aggiornata
+function create_external_grids(grids,Nx,Ny,Nz)
+    num_grids=length(grids)
+    OUTPUTgrids=Array{Array{Bool}}(undef,num_grids,6)
+    for k=1:num_grids
+        OUTPUTgrids[k,1]=falses(Nx,Ny,Nz)
+        OUTPUTgrids[k,2]=falses(Nx,Ny,Nz)
+        OUTPUTgrids[k,3]=falses(Nx,Ny,Nz)
+        OUTPUTgrids[k,4]=falses(Nx,Ny,Nz)
+        OUTPUTgrids[k,5]=falses(Nx,Ny,Nz)
+        OUTPUTgrids[k,6]=falses(Nx,Ny,Nz)
+    end    
+    for cont2=1:Ny
+        for cont3=1:Nz
+            for k=1:num_grids
+                if (grids[k][1][cont2][cont3])
+                    OUTPUTgrids[k,3][1,cont2,cont3]=true
+                    if Nx>1
+                        if !(grids[k][2][cont2][cont3])
+                            OUTPUTgrids[k,4][1,cont2,cont3]=true
+                        end
+                    end
+                end
+            end
+        end
+    end
     
-    OUTPUTgrids = zeros(Int8 ,num_grids ,6,Nx ,Ny ,Nz)
-
-
-    for cont2 in range(1, stop=Ny)
-        for cont3 in range(1, stop=Nz)
-            for k in range(1, stop=num_grids)
-                if (matrice[k][1][cont2][cont3]==1)
-                    OUTPUTgrids[k,3,1,cont2,cont3]=1
-                end
-            end
-        end
-    end
-
-    for cont2 in range(1, stop=Ny)
-        for cont3 in range(1, stop=Nz)
-            for k in range(1, stop=num_grids)
-                if (matrice[k][Nx][cont2][cont3]==1)
-                    OUTPUTgrids[k,4,Nx,cont2,cont3]=1
-                end
-            end
-        end
-    end
-
-    for cont in range(1, stop=Nx)
-        for cont3 in range(1, stop=Nz)
-            for k in range(1, stop=num_grids)
-                if (matrice[k][cont][1][cont3]==1)
-                    OUTPUTgrids[k,1,cont,1,cont3] = 1
-                end
-            end
-        end
-    end
-
-    for cont in range(1, stop=Nx)
-        for cont3 in range(1, stop=Nz)
-            for k in range(1, stop=num_grids)
-                if (matrice[k][cont][Ny][cont3] == 1)
-                    OUTPUTgrids[k,2,cont,Ny,cont3] = 1
-                end
-            end
-        end
-    end
-
-    for cont in range(1, stop=Nx)
-        for cont2 in range(1, stop=Ny)
-            for k in range(1, stop=num_grids)
-                if (matrice[k][cont][cont2][1]==1)
-                    OUTPUTgrids[k,5,cont,cont2,1] = 1
-                end
-            end
-        end
-    end
-
-    for cont in range(1, stop=Nx)
-        for cont2 in range(1, stop=Ny)
-            for k in range(1, stop=num_grids)
-                if(matrice[k][cont][cont2][Nz]==1)
-                    OUTPUTgrids[k,6,cont,cont2,Nz] = 1
-                end
-            end
-        end
-    end
-
-    for cont in range(2,stop=Nx-1)
-        for cont2 in range(1, stop=Ny)
-            for cont3 in range(1, stop=Nz)
-                for k in range(1, stop=num_grids)
-                    if (matrice[k][cont][cont2][cont3] == 1)
-                        if (matrice[k][cont - 1][cont2][cont3] == 0)
-                            OUTPUTgrids[k,3,cont,cont2,cont3] = 1
-                        end
-                        if (matrice[k][cont + 1][cont2][cont3] == 0)
-                            OUTPUTgrids[k,4,cont,cont2,cont3] = 1
+    for cont=Nx
+        for cont2=1:Ny
+            for cont3=1:Nz
+                for k=1:num_grids
+                    if(grids[k][cont][cont2][cont3])
+                        OUTPUTgrids[k,4][cont,cont2,cont3]=true
+                        if Nx>1
+                            if !(grids[k][cont-1][cont2][cont3])
+                                OUTPUTgrids[k,3][cont,cont2,cont3]=true
+                            end
                         end
                     end
                 end
             end
         end
     end
-
-    for cont in range(1, stop=Nx)
-        for cont2 in range(2, stop=Ny-1)
-            for cont3 in range(1, stop=Nz)
-                for k in range(1, stop=num_grids)
-                    if (matrice[k][cont][cont2][cont3] == 1)
-                        if (matrice[k][cont][cont2 - 1][cont3] == 0)
-                            OUTPUTgrids[k,1,cont,cont2,cont3] = 1
-                        end
-                        if (matrice[k][cont][cont2 + 1][cont3] == 0)
-                            OUTPUTgrids[k,2,cont,cont2,cont3] = 1
+    for cont=1:Nx
+        for cont3=1:Nz
+            for k=1:num_grids
+                if (grids[k][cont][1][cont3])
+                    OUTPUTgrids[k,1][cont,1,cont3]=true
+                    if Ny>1
+                        if !(grids[k][cont][2][cont3])
+                            OUTPUTgrids[k,2][cont,1,cont3]=true
                         end
                     end
                 end
             end
         end
     end
-
-    for cont in range(1, stop=Nx)
-        for cont2 in range(1, stop=Ny)
-            for cont3 in range(2, stop=Nz-1)
-                for k in range(1, stop=num_grids)
-                    if (matrice[k][cont][cont2][cont3] == 1)
-                        if (matrice[k][cont][cont2][cont3 - 1] == 0)
-                            OUTPUTgrids[k,5,cont,cont2,cont3] = 1
-                        end
-                        if (matrice[k][cont][cont2][cont3 + 1] == 0)
-                            OUTPUTgrids[k,6,cont,cont2,cont3] = 1
+    for cont=1:Nx
+        for cont2=Ny
+            for cont3=1:Nz
+                for k=1:num_grids
+                    if(grids[k][cont][cont2][cont3])
+                        OUTPUTgrids[k,2][cont,cont2,cont3]=true
+                        if Ny>1
+                            if !(grids[k][cont][cont2-1][cont3])
+                                OUTPUTgrids[k,1][cont,cont2,cont3]=true
+                            end
                         end
                     end
                 end
             end
         end
     end
-
+    for cont=1:Nx
+        for cont2=1:Ny
+            for k=1:num_grids
+                if(grids[k][cont][cont2][1])
+                    OUTPUTgrids[k,5][cont,cont2,1]=true
+                    if Nz>1
+                        if !(grids[k][cont][cont2][2])
+                            OUTPUTgrids[k,6][cont,cont2,1]=true
+                        end
+                    end
+                end
+            end
+        end
+    end
+    for cont=1:Nx
+        for cont2=1:Ny
+            for cont3=Nz
+                for k=1:num_grids
+                    if (grids[k][cont][cont2][cont3])
+                        OUTPUTgrids[k,6][cont,cont2,cont3]=true
+                        if Nz>1
+                            if !(grids[k][cont][cont2][cont3-1])
+                                OUTPUTgrids[k,5][cont,cont2,cont3]=true
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+    for cont=2:Nx-1
+        for cont2=1:Ny
+            for cont3=1:Nz
+                for k=1:num_grids
+                    if (grids[k][cont][cont2][cont3])
+                        if !(grids[k][cont-1][cont2][cont3])
+                            OUTPUTgrids[k,3][cont,cont2,cont3]=true
+                        end
+                        if !(grids[k][cont+1][cont2][cont3])
+                            OUTPUTgrids[k,4][cont,cont2,cont3]=true
+                        end
+                    end
+                end
+            end
+        end
+    end
+    for cont=1:Nx
+        for cont2=2:Ny-1
+            for cont3=1:Nz
+                for k=1:num_grids
+                    if(grids[k][cont][cont2][cont3])
+                        if !(grids[k][cont][cont2-1][cont3])
+                            OUTPUTgrids[k,1][cont,cont2,cont3]=true
+                        end
+                        if !(grids[k][cont][cont2+1][cont3])
+                            OUTPUTgrids[k,2][cont,cont2,cont3]=true
+                        end
+                    end
+                end
+            end
+        end
+    end
+    for cont=1:Nx
+        for cont2=1:Ny
+            for cont3=2:Nz-1
+                for k=1:num_grids
+                    if (grids[k][cont][cont2][cont3])
+                        if !(grids[k][cont][cont2][cont3-1])
+                            OUTPUTgrids[k,5][cont,cont2,cont3]=true
+                        end
+                        if !(grids[k][cont][cont2][cont3+1])
+                            OUTPUTgrids[k,6][cont,cont2,cont3]=true
+                        end
+                    end
+                end
+            end
+        end
+    end
     return OUTPUTgrids
 end
 
@@ -733,6 +766,142 @@ function create_mapping_Az(grids, mapping_Vox, nodes, nodes_red)
         end
     end
     return mapping, num_ele
+end
+
+#Aggiornata
+function compute_diagonals(escalings, materials, sx, sy, sz, lix_mat, liy_mat, liz_mat, lix_border, liy_border, liz_border)
+    escaling_R = escalings.R
+    escaling_Cd = escalings.Cd
+    escaling_Lp = escalings.Lp
+    eps0 = 8.854187816997944e-12
+    for cont in range(1,length(materials))
+        sigmar = materials[cont].sigmar
+        epsr = materials[cont].epsr
+        if sigmar != 0
+            materials[cont].Rx = 0.5 * sx / (sigmar * sy * sz)
+            materials[cont].Ry = 0.5 * sy / (sigmar * sx * sz)
+            materials[cont].Rz = 0.5 * sz / (sigmar * sy * sx)
+            if epsr == 1
+                materials[cont].Cx = 0
+                materials[cont].Cy = 0
+                materials[cont].Cz = 0
+            else
+                materials[cont].Cx = eps0 * (epsr - 1) * sy * sz / (0.5 * sx)
+                materials[cont].Cy = eps0 * (epsr - 1) * sx * sz / (0.5 * sy)
+                materials[cont].Cz = eps0 * (epsr - 1) * sy * sx / (0.5 * sz)
+            end
+        else
+            epsr = materials[cont].epsr
+            materials[cont].Rx = 0
+            materials[cont].Ry = 0
+            materials[cont].Rz = 0
+            materials[cont].Cx = eps0 * (epsr - 1) * sy * sz / (0.5 * sx)
+            materials[cont].Cy = eps0 * (epsr - 1) * sx * sz / (0.5 * sy)
+            materials[cont].Cz = eps0 * (epsr - 1) * sy * sx / (0.5 * sz)
+        end
+    end
+    Rx = zeros(size(lix_border,1), 4)
+    Ry = zeros(size(liy_border,1), 4)
+    Rz = zeros(size(liz_border,1), 4)
+    Cx = zeros(size(lix_border,1), 4)
+    Cy = zeros(size(liy_border,1), 4)
+    Cz = zeros(size(liz_border,1), 4)
+    for cont in range(1,length(materials))
+        if materials[cont].Rx != 0
+            ind_m = findall(x -> x == cont, lix_mat[:, 1])
+            Rx[ind_m, 1] .= materials[cont].Rx
+            ind_m = findall(x -> x == cont, lix_mat[:, 2])
+            Rx[ind_m, 2] .= materials[cont].Rx
+            ind_m = findall(x -> x == cont, lix_border[:, 1])
+            Rx[ind_m, 3] .= materials[cont].Rx
+            ind_m = findall(x -> x == cont, lix_border[:, 2])
+            Rx[ind_m, 4] .= +materials[cont].Rx
+        end
+        if materials[cont].Cx != 0
+            ind_m = findall(x -> x == cont, lix_mat[:, 1])
+            Cx[ind_m, 1] .= materials[cont].Cx
+            ind_m = findall(x -> x == cont, lix_mat[:, 2])
+            Cx[ind_m, 2] .= materials[cont].Cx
+            ind_m = findall(x -> x == cont, lix_border[:, 1])
+            Cx[ind_m, 3] .= materials[cont].Cx
+            ind_m = findall(x -> x == cont, lix_border[:, 2])
+            Cx[ind_m, 4] .= +materials[cont].Cx
+        end
+        if materials[cont].Ry != 0
+            ind_m = findall(x -> x == cont, liy_mat[:, 1])
+            Ry[ind_m, 1] .= materials[cont].Ry
+            ind_m = findall(x -> x == cont, liy_mat[:, 2])
+            Ry[ind_m, 2] .= materials[cont].Ry
+            ind_m = findall(x -> x == cont, liy_border[:, 1])
+            Ry[ind_m, 3] .= materials[cont].Ry
+            ind_m = findall(x -> x == cont, liy_border[:, 2])
+            Ry[ind_m, 4] .= +materials[cont].Ry
+        end
+        if materials[cont].Cy != 0
+            ind_m = findall(x -> x == cont, liy_mat[:, 1])
+            Cy[ind_m, 1] .= materials[cont].Cy
+            ind_m = findall(x -> x == cont, liy_mat[:, 2])
+            Cy[ind_m, 2] .= materials[cont].Cy
+            ind_m = findall(x -> x == cont, liy_border[:, 1])
+            Cy[ind_m, 3] .= materials[cont].Cy
+            ind_m = findall(x -> x == cont, liy_border[:, 2])
+            Cy[ind_m, 4] .= +materials[cont].Cy
+        end
+        if materials[cont].Rz != 0
+            ind_m = findall(x -> x == cont, liz_mat[:, 1])
+            Rz[ind_m, 1] .= materials[cont].Rz
+            ind_m = findall(x -> x == cont, liz_mat[:, 2])
+            Rz[ind_m, 2] .= materials[cont].Rz
+            ind_m = findall(x -> x == cont, liz_border[:, 1])
+            Rz[ind_m, 3] .= materials[cont].Rz
+            ind_m = findall(x -> x == cont, liz_border[:, 2])
+            Rz[ind_m, 4] .= +materials[cont].Rz
+        end
+        if materials[cont].Cz != 0
+            ind_m = findall(x -> x == cont, liz_mat[:, 1])
+            Cz[ind_m, 1] .= materials[cont].Cz
+            ind_m = findall(x -> x == cont, liz_mat[:, 2])
+            Cz[ind_m, 2] .= materials[cont].Cz
+            ind_m = findall(x -> x == cont, liz_border[:, 1])
+            Cz[ind_m, 3] .= materials[cont].Cz
+            ind_m = findall(x -> x == cont, liz_border[:, 2])
+            Cz[ind_m, 4] .= +materials[cont].Cz
+        end
+    end
+    lix_aux = ceil.(Int, lix_border[:, 1] / 100) + ceil.(Int, lix_border[:, 2] / 100)
+    liy_aux = ceil.(Int, liy_border[:, 1] / 100) + ceil.(Int, liy_border[:, 2] / 100)
+    liz_aux = ceil.(Int, liz_border[:, 1] / 100) + ceil.(Int, liz_border[:, 2] / 100)
+    i1x = findall(x -> x == 1, lix_aux)
+    i2x = findall(x -> x == 2, lix_aux)
+    i1y = findall(x -> x == 1, liy_aux)
+    i2y = findall(x -> x == 2, liy_aux)
+    i1z = findall(x -> x == 1, liz_aux)
+    i2z = findall(x -> x == 2, liz_aux)
+    Self_x = Lp_self(sx, sy, sz)
+    Self_y = Lp_self(sy, sx, sz)
+    Self_z = Lp_self(sz, sy, sx)
+    Self_x1 = Lp_self(sx + sx / 2, sy, sz)
+    Self_y1 = Lp_self(sy + sy / 2, sx, sz)
+    Self_z1 = Lp_self(sz + sz / 2, sy, sx)
+    Self_x2 = Lp_self(2 * sx, sy, sz)
+    Self_y2 = Lp_self(2 * sy, sx, sz)
+    Self_z2 = Lp_self(2 * sz, sy, sx)
+    diag_Lp_x = Self_x * ones(size(lix_aux, 1), 1)
+    diag_Lp_y = Self_y * ones(size(liy_aux, 1), 1)
+    diag_Lp_z = Self_z * ones(size(liz_aux, 1), 1)
+    diag_Lp_x[i1x] = Self_x1 * ones(length(i1x), 1)
+    diag_Lp_y[i1y] = Self_y1 * ones(length(i1y), 1)
+    diag_Lp_z[i1z] = Self_z1 * ones(length(i1z), 1)
+    diag_Lp_x[i2x] = Self_x2 * ones(length(i2x), 1)
+    diag_Lp_y[i2y] = Self_y2 * ones(length(i2y), 1)
+    diag_Lp_z[i2z] = Self_z2 * ones(length(i2z), 1)
+    diagonals = Dict()
+    diagonals["R"] = escaling_R * [Rx; Ry; Rz]
+    diagonals["Cd"] = escaling_Cd * [Cx; Cy; Cz]
+    diagonals["Lp"] = escaling_Lp * [diag_Lp_x; diag_Lp_y; diag_Lp_z]
+    diagonals["fc_Lp"] = escaling_Lp * ([diag_Lp_x; diag_Lp_y; diag_Lp_z] - [Self_x * ones(size(lix_aux, 1), 1); Self_y * ones(size(liy_aux, 1), 1); Self_z * ones(size(liz_aux, 1), 1)])
+
+    return diagonals
 end
 
 #Non sostituita
@@ -938,143 +1107,6 @@ function create_A_mats_volInd(matrice,Nx,Ny,Nz,mapping_Vox,mapAx, NAx, mapAy, NA
 
 
     return ind_row,ind_col,vals_A,lix_mat,liy_mat,liz_mat,lix_border,liy_border,liz_border,bars_Lp_x,bars_Lp_y,bars_Lp_z
-end
-
-
-#Aggiornata
-function compute_diagonals(escalings, materials, sx, sy, sz, lix_mat, liy_mat, liz_mat, lix_border, liy_border, liz_border)
-    escaling_R = escalings.R
-    escaling_Cd = escalings.Cd
-    escaling_Lp = escalings.Lp
-    eps0 = 8.854187816997944e-12
-    for cont in range(1,length(materials))
-        sigmar = materials[cont].sigmar
-        epsr = materials[cont].epsr
-        if sigmar != 0
-            materials[cont].Rx = 0.5 * sx / (sigmar * sy * sz)
-            materials[cont].Ry = 0.5 * sy / (sigmar * sx * sz)
-            materials[cont].Rz = 0.5 * sz / (sigmar * sy * sx)
-            if epsr == 1
-                materials[cont].Cx = 0
-                materials[cont].Cy = 0
-                materials[cont].Cz = 0
-            else
-                materials[cont].Cx = eps0 * (epsr - 1) * sy * sz / (0.5 * sx)
-                materials[cont].Cy = eps0 * (epsr - 1) * sx * sz / (0.5 * sy)
-                materials[cont].Cz = eps0 * (epsr - 1) * sy * sx / (0.5 * sz)
-            end
-        else
-            epsr = materials[cont].epsr
-            materials[cont].Rx = 0
-            materials[cont].Ry = 0
-            materials[cont].Rz = 0
-            materials[cont].Cx = eps0 * (epsr - 1) * sy * sz / (0.5 * sx)
-            materials[cont].Cy = eps0 * (epsr - 1) * sx * sz / (0.5 * sy)
-            materials[cont].Cz = eps0 * (epsr - 1) * sy * sx / (0.5 * sz)
-        end
-    end
-    Rx = zeros(size(lix_border,1), 4)
-    Ry = zeros(size(liy_border,1), 4)
-    Rz = zeros(size(liz_border,1), 4)
-    Cx = zeros(size(lix_border,1), 4)
-    Cy = zeros(size(liy_border,1), 4)
-    Cz = zeros(size(liz_border,1), 4)
-    for cont in range(1,length(materials))
-        if materials[cont].Rx != 0
-            ind_m = findall(x -> x == cont, lix_mat[:, 1])
-            Rx[ind_m, 1] .= materials[cont].Rx
-            ind_m = findall(x -> x == cont, lix_mat[:, 2])
-            Rx[ind_m, 2] .= materials[cont].Rx
-            ind_m = findall(x -> x == cont, lix_border[:, 1])
-            Rx[ind_m, 3] .= materials[cont].Rx
-            ind_m = findall(x -> x == cont, lix_border[:, 2])
-            Rx[ind_m, 4] .= +materials[cont].Rx
-        end
-        if materials[cont].Cx != 0
-            ind_m = findall(x -> x == cont, lix_mat[:, 1])
-            Cx[ind_m, 1] .= materials[cont].Cx
-            ind_m = findall(x -> x == cont, lix_mat[:, 2])
-            Cx[ind_m, 2] .= materials[cont].Cx
-            ind_m = findall(x -> x == cont, lix_border[:, 1])
-            Cx[ind_m, 3] .= materials[cont].Cx
-            ind_m = findall(x -> x == cont, lix_border[:, 2])
-            Cx[ind_m, 4] .= +materials[cont].Cx
-        end
-        if materials[cont].Ry != 0
-            ind_m = findall(x -> x == cont, liy_mat[:, 1])
-            Ry[ind_m, 1] .= materials[cont].Ry
-            ind_m = findall(x -> x == cont, liy_mat[:, 2])
-            Ry[ind_m, 2] .= materials[cont].Ry
-            ind_m = findall(x -> x == cont, liy_border[:, 1])
-            Ry[ind_m, 3] .= materials[cont].Ry
-            ind_m = findall(x -> x == cont, liy_border[:, 2])
-            Ry[ind_m, 4] .= +materials[cont].Ry
-        end
-        if materials[cont].Cy != 0
-            ind_m = findall(x -> x == cont, liy_mat[:, 1])
-            Cy[ind_m, 1] .= materials[cont].Cy
-            ind_m = findall(x -> x == cont, liy_mat[:, 2])
-            Cy[ind_m, 2] .= materials[cont].Cy
-            ind_m = findall(x -> x == cont, liy_border[:, 1])
-            Cy[ind_m, 3] .= materials[cont].Cy
-            ind_m = findall(x -> x == cont, liy_border[:, 2])
-            Cy[ind_m, 4] .= +materials[cont].Cy
-        end
-        if materials[cont].Rz != 0
-            ind_m = findall(x -> x == cont, liz_mat[:, 1])
-            Rz[ind_m, 1] .= materials[cont].Rz
-            ind_m = findall(x -> x == cont, liz_mat[:, 2])
-            Rz[ind_m, 2] .= materials[cont].Rz
-            ind_m = findall(x -> x == cont, liz_border[:, 1])
-            Rz[ind_m, 3] .= materials[cont].Rz
-            ind_m = findall(x -> x == cont, liz_border[:, 2])
-            Rz[ind_m, 4] .= +materials[cont].Rz
-        end
-        if materials[cont].Cz != 0
-            ind_m = findall(x -> x == cont, liz_mat[:, 1])
-            Cz[ind_m, 1] .= materials[cont].Cz
-            ind_m = findall(x -> x == cont, liz_mat[:, 2])
-            Cz[ind_m, 2] .= materials[cont].Cz
-            ind_m = findall(x -> x == cont, liz_border[:, 1])
-            Cz[ind_m, 3] .= materials[cont].Cz
-            ind_m = findall(x -> x == cont, liz_border[:, 2])
-            Cz[ind_m, 4] .= +materials[cont].Cz
-        end
-    end
-    lix_aux = ceil.(Int, lix_border[:, 1] / 100) + ceil.(Int, lix_border[:, 2] / 100)
-    liy_aux = ceil.(Int, liy_border[:, 1] / 100) + ceil.(Int, liy_border[:, 2] / 100)
-    liz_aux = ceil.(Int, liz_border[:, 1] / 100) + ceil.(Int, liz_border[:, 2] / 100)
-    i1x = findall(x -> x == 1, lix_aux)
-    i2x = findall(x -> x == 2, lix_aux)
-    i1y = findall(x -> x == 1, liy_aux)
-    i2y = findall(x -> x == 2, liy_aux)
-    i1z = findall(x -> x == 1, liz_aux)
-    i2z = findall(x -> x == 2, liz_aux)
-    Self_x = Lp_self(sx, sy, sz)
-    Self_y = Lp_self(sy, sx, sz)
-    Self_z = Lp_self(sz, sy, sx)
-    Self_x1 = Lp_self(sx + sx / 2, sy, sz)
-    Self_y1 = Lp_self(sy + sy / 2, sx, sz)
-    Self_z1 = Lp_self(sz + sz / 2, sy, sx)
-    Self_x2 = Lp_self(2 * sx, sy, sz)
-    Self_y2 = Lp_self(2 * sy, sx, sz)
-    Self_z2 = Lp_self(2 * sz, sy, sx)
-    diag_Lp_x = Self_x * ones(size(lix_aux, 1), 1)
-    diag_Lp_y = Self_y * ones(size(liy_aux, 1), 1)
-    diag_Lp_z = Self_z * ones(size(liz_aux, 1), 1)
-    diag_Lp_x[i1x] = Self_x1 * ones(length(i1x), 1)
-    diag_Lp_y[i1y] = Self_y1 * ones(length(i1y), 1)
-    diag_Lp_z[i1z] = Self_z1 * ones(length(i1z), 1)
-    diag_Lp_x[i2x] = Self_x2 * ones(length(i2x), 1)
-    diag_Lp_y[i2y] = Self_y2 * ones(length(i2y), 1)
-    diag_Lp_z[i2z] = Self_z2 * ones(length(i2z), 1)
-    diagonals = Dict()
-    diagonals["R"] = escaling_R * [Rx; Ry; Rz]
-    diagonals["Cd"] = escaling_Cd * [Cx; Cy; Cz]
-    diagonals["Lp"] = escaling_Lp * [diag_Lp_x; diag_Lp_y; diag_Lp_z]
-    diagonals["fc_Lp"] = escaling_Lp * ([diag_Lp_x; diag_Lp_y; diag_Lp_z] - [Self_x * ones(size(lix_aux, 1), 1); Self_y * ones(size(liy_aux, 1), 1); Self_z * ones(size(liz_aux, 1), 1)])
-
-    return diagonals
 end
 
 #Non sostituita
